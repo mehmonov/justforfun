@@ -4,21 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>just for fun</title>
-    
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        footer {
+            margin-top: auto;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
-    <h1 class="text-4xl font-bold mb-8">just for fun </h1>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 ">
-        <a href="antipode.html" class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-xl transform hover:scale-105 transition">
-            <h2 class="text-2xl font-bold mb-4">Antipode Map</h2>
-            <p>Calculate and view the antipode of a given location on the map.</p>
-        </a>
-        <a href="antipode.html" class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-xl transform hover:scale-105 transition">
-            <h2 class="text-2xl font-bold mb-4">Age ??</h2>
-            <p>Calculate and view the antipode of a given location on the map.</p>
-        </a>
-       
+<body class="bg-gray-100">
+    <div class="flex-grow flex flex-col items-center justify-center">
+        <h1 class="text-4xl font-bold mb-8">just for fun</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <a href="antipode.html" class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-xl transform hover:scale-105 transition">
+                <h2 class="text-2xl font-bold mb-4">Antipode Map</h2>
+                <p>Calculate and view the antipode of a given location on the map.</p>
+            </a>
+            <a href="antipode.html" class="bg-white shadow-md rounded-lg p-6 text-center hover:shadow-xl transform hover:scale-105 transition">
+                <h2 class="text-2xl font-bold mb-4">Age ??</h2>
+                <p>Calculate and view the antipode of a given location on the map.</p>
+            </a>
+        </div>
     </div>
+    <footer class="py-4 w-full text-center">
+        <p>Author: <span class="font-semibold"><a href="https://t.me/Mehmonov_husniddin">Mehmonov Husniddin</a></span></p>
+    </footer>
 </body>
 </html>
