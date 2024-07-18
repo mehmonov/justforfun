@@ -89,7 +89,6 @@ function calculateAntipode(latitude, longitude) {
     `;
 
     showAntipodeMap(antipodeLatitude, antipodeLongitude);
-    getAddress(antipodeLatitude, antipodeLongitude, 'Antipode location: ');
 }
 
 function showAntipodeMap(lat, lon) {
