@@ -4,16 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Game</title>
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com">
+        
+    </script>
+    <link src="style.css">
+    
 </head>
-<body>
-    <div class="container">
-        <h1>Memory Game</h1>
-        <p class="description">Memory Game is a game where you have to find matching pairs of cards.</p>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+    <div class="mb-4 text-2xl font-bold text-gray-800">Level: <span id="level">1</span></div>
+    <div id="gameBoard" class="grid gap-2 p-4 bg-white rounded-lg shadow-lg"></div>
+    <div class="mt-4 text-red-500 hidden" id="message">Xato! Qaytadan uruning</div>
 
-        <div id="game-board"></div>
-        <button id="reset-button">Reset</button>
-    </div>
-    <script src="script.js"></script>
+ <script src="script.js"></script>
 </body>
 </html>
