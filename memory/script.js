@@ -1,72 +1,79 @@
-const shapes = ['▲', '●', '■', '★', '♥', '♦', '♣', '♠'];
-const gameBoard = document.getElementById('game-board');
-const resetButton = document.getElementById('reset-button');
-let cards = [];
-let flippedCards = [];
-let matchedPairs = 0;
-
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
-
-function createBoard() {
-    const allShapes = [...shapes, ...shapes];
-    const shuffledShapes = shuffleArray(allShapes);
-    gameBoard.innerHTML = '';
-    cards = [];
-    flippedCards = [];
-    matchedPairs = 0;
-
-    shuffledShapes.forEach((shape, index) => {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.dataset.index = index;
-        card.dataset.shape = shape;
-        card.addEventListener('click', flipCard);
-        gameBoard.appendChild(card);
-        cards.push(card);
-    });
-}
-
-function flipCard() {
-    if (flippedCards.length < 2 && !this.classList.contains('flipped')) {
-        this.classList.add('flipped');
-        this.textContent = this.dataset.shape;  
-        flippedCards.push(this);
-
-        if (flippedCards.length === 2) {
-            setTimeout(checkMatch, 500);
-        }
-    }
-}
-
-function checkMatch() {
-    const [card1, card2] = flippedCards;
-    const shape1 = card1.dataset.shape;
-    const shape2 = card2.dataset.shape;
-
-    if (shape1 === shape2) {
-        matchedPairs++;
-        if (matchedPairs === shapes.length) {
+   let currentLevel = 1;
+        let sequence = [];
+        let userInput = [];
+        
+        function createBoard(size) {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.className = `grid gap-2 p-4 bg-white rounded-lg shadow-lg grid-cols-${size}`;
             
-            alert("Congratulations! You've won the game!");
+            gameBoard.innerHTML = '';
+            for(let i = 0; i < size*size; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell w-16 h-16 bg-blue-200 rounded-lg hover:bg-blue-300';
+                cell.dataset.index = i;
+                cell.addEventListener('click', handleClick);
+                gameBoard.appendChild(cell);
+            }
         }
-    } else {
-        card1.classList.remove('flipped');
-        card2.classList.remove('flipped');
-        card1.textContent = '';
-        card2.textContent = '';
-    }
 
-    flippedCards = [];
-}
+        function generateSequence() {
+            sequence = [];
+            for(let i = 0; i < currentLevel + 1; i++) {
+                sequence.push(Math.floor(Math.random() * (currentLevel + 1) * (currentLevel + 1)));
+            }
+            showSequence();
+        }
 
+        function showSequence() {
+            let i = 0;
+            const cells = document.querySelectorAll('.cell');
+            const interval = setInterval(() => {
+                if(i >= sequence.length) {
+                    clearInterval(interval);
+                    return;
+                }
+                const index = sequence[i];
+                cells[index].classList.add('active');
+                setTimeout(() => {
+                    cells[index].classList.remove('active');
+                }, 500);
+                i++;
+            }, 1000);
+        }
 
-resetButton.addEventListener('click', createBoard);
+        function handleClick(e) {
+            const clickedIndex = parseInt(e.target.dataset.index);
+            userInput.push(clickedIndex);
+            e.target.classList.add('active');
+            setTimeout(() => e.target.classList.remove('active'), 200);
+            
+            checkInput();
+        }
 
-createBoard();
+        function checkInput() {
+            const isCorrect = userInput.every((val, i) => val === sequence[i]);
+            
+            if(!isCorrect) {
+                document.getElementById('message').classList.remove('hidden');
+                setTimeout(() => {
+                    userInput = [];
+                    document.getElementById('message').classList.add('hidden');
+                    generateSequence();
+                }, 1000);
+                return;
+            }
+            
+            if(userInput.length === sequence.length) {
+                currentLevel++;
+                document.getElementById('level').textContent = currentLevel;
+                userInput = [];
+                setTimeout(() => {
+                    createBoard(currentLevel + 1);
+                    generateSequence();
+                }, 1000);
+            }
+        }
+
+        
+        createBoard(2); 
+        setTimeout(generateSequence, 1000);
