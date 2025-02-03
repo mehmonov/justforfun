@@ -10,119 +10,155 @@
             transition: all 0.3s ease;
             cursor: pointer;
         }
+        .selected {
+            background: #10b981 !important;
+        }
         .active {
             background: #f59e0b !important;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
     <div class="mb-4 text-2xl font-bold text-gray-800">Level: <span id="level">1</span></div>
     <div id="gameBoard" class="grid gap-2 p-4 bg-white rounded-lg shadow-lg"></div>
     <div class="mt-4 text-red-500 hidden" id="message">Xato! Qaytadan uruning</div>
 
     <script>
-        let currentLevel = 1;
-        let sequence = [];
-        let userInput = [];
-        let isClickable = false;
-        
-        function createBoard(size) {
-            const gameBoard = document.getElementById('gameBoard');
-            gameBoard.className = `grid gap-2 p-4 bg-white rounded-lg shadow-lg grid-cols-${size}`;
-            
-            gameBoard.innerHTML = '';
-            for(let i = 0; i < size*size; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell w-16 h-16 bg-blue-200 rounded-lg hover:bg-blue-300';
-                cell.dataset.index = i;
-                gameBoard.appendChild(cell);
+        class MemoryGame {
+            constructor() {
+                this.currentLevel = 1;
+                this.sequence = [];
+                this.userInput = [];
+                this.isClickable = false;
+                this.MAX_GRID_SIZE = 5;
+                this.initGame();
             }
-        }
 
-        function generateSequence() {
-            sequence = [];
-            const gridSize = currentLevel + 1;
-            for(let i = 0; i < currentLevel + 1; i++) {
-                sequence.push(Math.floor(Math.random() * gridSize * gridSize));
+            initGame() {
+                this.createBoard();
+                this.addClickListeners();
+                setTimeout(() => this.generateSequence(), 1000);
             }
-            showSequence();
-        }
 
-        function showSequence() {
-            isClickable = false;
-            let i = 0;
-            const cells = document.querySelectorAll('.cell');
-            const interval = setInterval(() => {
-                if(i >= sequence.length) {
-                    clearInterval(interval);
-                    isClickable = true;
+            getGridSize() {
+                return this.currentLevel >= 4 ? this.MAX_GRID_SIZE : this.currentLevel + 1;
+            }
+
+            createBoard() {
+                const gridSize = this.getGridSize();
+                const gameBoard = document.getElementById('gameBoard');
+                gameBoard.className = `grid gap-2 p-4 bg-white rounded-lg shadow-lg grid-cols-${gridSize}`;
+                gameBoard.innerHTML = '';
+
+                for(let i = 0; i < gridSize * gridSize; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell w-16 h-16 bg-blue-200 rounded-lg hover:bg-blue-300';
+                    cell.dataset.index = i;
+                    gameBoard.appendChild(cell);
+                }
+            }
+
+            generateSequence() {
+                const gridSize = this.getGridSize();
+                const uniqueNumbers = new Set();
+                
+                while(uniqueNumbers.size < this.currentLevel + 1) {
+                    uniqueNumbers.add(Math.floor(Math.random() * gridSize * gridSize));
+                }
+
+                this.sequence = [...uniqueNumbers];
+                this.showSequence();
+            }
+
+            showSequence() {
+                this.isClickable = false;
+                const cells = document.querySelectorAll('.cell');
+                let i = 0;
+
+                const showNextCell = () => {
+                    if(i >= this.sequence.length) {
+                        this.isClickable = true;
+                        return;
+                    }
+
+                    const index = this.sequence[i];
+                    cells[index].classList.add('active');
+                    
+                    setTimeout(() => {
+                        cells[index].classList.remove('active');
+                        i++;
+                        setTimeout(showNextCell, 500);
+                    }, 500);
+                };
+
+                showNextCell();
+            }
+
+            handleClick(e) {
+                if(!this.isClickable) return;
+
+                const clickedIndex = parseInt(e.target.dataset.index);
+                if(this.userInput.includes(clickedIndex)) return;
+
+                e.target.classList.add('selected');
+                this.userInput.push(clickedIndex);
+                this.checkInput();
+            }
+
+            checkInput() {
+                const isCorrect = this.userInput.length <= this.sequence.length &&
+                    this.userInput.every((val, i) => val === this.sequence[i]);
+
+                if(!isCorrect) {
+                    this.handleWrongAnswer();
                     return;
                 }
-                const index = sequence[i];
-                cells[index].classList.add('active');
-                setTimeout(() => {
-                    cells[index].classList.remove('active');
-                }, 500);
-                i++;
-            }, 1000);
-        }
 
-        function handleClick(e) {
-            if(!isClickable) return;
-            
-            const clickedIndex = parseInt(e.target.dataset.index);
-            
-            // Katakni bir marta bosishni tekshirish
-            if(userInput.includes(clickedIndex)) return;
-            
-            userInput.push(clickedIndex);
-            e.target.classList.add('active');
-            setTimeout(() => e.target.classList.remove('active'), 200);
-            
-            checkInput();
-        }
+                if(this.userInput.length === this.sequence.length) {
+                    this.handleCorrectAnswer();
+                }
+            }
 
-        function checkInput() {
-            const isCorrect = userInput.every((val, i) => val === sequence[i]);
-            
-            if(!isCorrect) {
-                isClickable = false;
+            handleWrongAnswer() {
+                this.isClickable = false;
                 document.getElementById('message').classList.remove('hidden');
                 setTimeout(() => {
-                    userInput = [];
-                    document.getElementById('message').classList.add('hidden');
-                    generateSequence();
-                }, 1000);
-                return;
+                    this.resetGame();
+                    this.createBoard();
+                    this.addClickListeners();
+                    setTimeout(() => this.generateSequence(), 1000);
+                }, 1500);
             }
-            
-            if(userInput.length === sequence.length) {
-                currentLevel++;
-                document.getElementById('level').textContent = currentLevel;
-                userInput = [];
-                isClickable = false;
-                setTimeout(() => {
-                    createBoard(currentLevel + 1);
-                    addClickListeners();
-                    generateSequence();
-                }, 1000);
-            }
-        }
 
-        function addClickListeners() {
-            document.querySelectorAll('.cell').forEach(cell => {
-                cell.addEventListener('click', handleClick);
-            });
+            handleCorrectAnswer() {
+                this.currentLevel++;
+                document.getElementById('level').textContent = this.currentLevel;
+                setTimeout(() => {
+                    this.resetGame();
+                    this.createBoard();
+                    this.addClickListeners();
+                    this.generateSequence();
+                }, 1000);
+            }
+
+            resetGame() {
+                this.userInput = [];
+                this.isClickable = false;
+                document.getElementById('message').classList.add('hidden');
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.classList.remove('selected');
+                });
+            }
+
+            addClickListeners() {
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.addEventListener('click', (e) => this.handleClick(e));
+                });
+            }
         }
 
         // O'yinni boshlash
-        function initGame() {
-            createBoard(2);
-            addClickListeners();
-            setTimeout(generateSequence, 1000);
-        }
-
-        initGame();
+        new MemoryGame();
     </script>
 </body>
 </html>
