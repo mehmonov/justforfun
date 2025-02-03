@@ -4,17 +4,125 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Game</title>
-    <script src="https://cdn.tailwindcss.com">
-        
-    </script>
-    <link src="style.css">
-    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .cell {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .active {
+            background: #f59e0b !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center">
     <div class="mb-4 text-2xl font-bold text-gray-800">Level: <span id="level">1</span></div>
     <div id="gameBoard" class="grid gap-2 p-4 bg-white rounded-lg shadow-lg"></div>
     <div class="mt-4 text-red-500 hidden" id="message">Xato! Qaytadan uruning</div>
 
- <script src="script.js"></script>
+    <script>
+        let currentLevel = 1;
+        let sequence = [];
+        let userInput = [];
+        let isClickable = false;
+        
+        function createBoard(size) {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.className = `grid gap-2 p-4 bg-white rounded-lg shadow-lg grid-cols-${size}`;
+            
+            gameBoard.innerHTML = '';
+            for(let i = 0; i < size*size; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell w-16 h-16 bg-blue-200 rounded-lg hover:bg-blue-300';
+                cell.dataset.index = i;
+                gameBoard.appendChild(cell);
+            }
+        }
+
+        function generateSequence() {
+            sequence = [];
+            const gridSize = currentLevel + 1;
+            for(let i = 0; i < currentLevel + 1; i++) {
+                sequence.push(Math.floor(Math.random() * gridSize * gridSize));
+            }
+            showSequence();
+        }
+
+        function showSequence() {
+            isClickable = false;
+            let i = 0;
+            const cells = document.querySelectorAll('.cell');
+            const interval = setInterval(() => {
+                if(i >= sequence.length) {
+                    clearInterval(interval);
+                    isClickable = true;
+                    return;
+                }
+                const index = sequence[i];
+                cells[index].classList.add('active');
+                setTimeout(() => {
+                    cells[index].classList.remove('active');
+                }, 500);
+                i++;
+            }, 1000);
+        }
+
+        function handleClick(e) {
+            if(!isClickable) return;
+            
+            const clickedIndex = parseInt(e.target.dataset.index);
+            
+            // Katakni bir marta bosishni tekshirish
+            if(userInput.includes(clickedIndex)) return;
+            
+            userInput.push(clickedIndex);
+            e.target.classList.add('active');
+            setTimeout(() => e.target.classList.remove('active'), 200);
+            
+            checkInput();
+        }
+
+        function checkInput() {
+            const isCorrect = userInput.every((val, i) => val === sequence[i]);
+            
+            if(!isCorrect) {
+                isClickable = false;
+                document.getElementById('message').classList.remove('hidden');
+                setTimeout(() => {
+                    userInput = [];
+                    document.getElementById('message').classList.add('hidden');
+                    generateSequence();
+                }, 1000);
+                return;
+            }
+            
+            if(userInput.length === sequence.length) {
+                currentLevel++;
+                document.getElementById('level').textContent = currentLevel;
+                userInput = [];
+                isClickable = false;
+                setTimeout(() => {
+                    createBoard(currentLevel + 1);
+                    addClickListeners();
+                    generateSequence();
+                }, 1000);
+            }
+        }
+
+        function addClickListeners() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.addEventListener('click', handleClick);
+            });
+        }
+
+        // O'yinni boshlash
+        function initGame() {
+            createBoard(2);
+            addClickListeners();
+            setTimeout(generateSequence, 1000);
+        }
+
+        initGame();
+    </script>
 </body>
 </html>
